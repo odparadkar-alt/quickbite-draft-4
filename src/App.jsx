@@ -244,45 +244,16 @@ const ProfilePage = () => (
   <div className="container">
     <div className="header">
       <h1>👤 My Profile</h1>
-      <p>Welcome, <strong>{user.name}</strong></p>
     </div>
-
-    <button className="back-btn" onClick={() => setPage('menu')}><FiArrowLeft /> Back to Menu</button>
-
-    <div className="profile-grid">
-      <div className="profile-box">
-        <h3>📋 Profile Information</h3>
-        <p><strong>Name:</strong> {user.name}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Phone:</strong> {user.phone || '+91 XXXXXXXXXX'}</p>
-        <button className="btn-primary" onClick={() => alert('Edit profile coming soon!')}>✏️ Edit Profile</button>
-      </div>
-
-      <div className="profile-box">
-        <h3>🥗 Dietary Preferences</h3>
-        <label><input type="checkbox" /> Vegetarian</label><br/>
-        <label><input type="checkbox" /> Non-Vegetarian</label><br/>
-        <label><input type="checkbox" /> Vegan</label><br/>
-        <label><input type="checkbox" /> Gluten-free</label><br/>
-        <button className="btn-primary" onClick={() => alert('Preferences saved!')}>Save</button>
-      </div>
-    </div>
-
-    <div className="profile-section">
-      <h3>📜 Past Orders</h3>
-      <div className="order-card">
-        <p><strong>Order ID:</strong> QB12345</p>
-        <p><strong>Amount:</strong> ₹284</p>
-        <p><strong>Date:</strong> Today</p>
-        <p><strong>Status:</strong> ✅ Completed</p>
-      </div>
-    </div>
-
+    <p>Profile page works!</p>
+    <p>Name: {user.name}</p>
+    <p>Email: {user.email}</p>
+    <button className="btn-primary" onClick={() => setPage('menu')}>Back to Menu</button>
     <button className="btn-logout" onClick={() => {
       setUser(null);
       setCart([]);
       setPage('login');
-    }}>👤 Logout</button>
+    }}>Logout</button>
   </div>
 );
 
