@@ -18,6 +18,14 @@ function App() {
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [userProfile, setUserProfile] = useState({
+  name: '',
+  email: '',
+  phone: '',
+  dietaryPreferences: []
+});
+const [pastOrders, setPastOrders] = useState([]);
+const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const [pickupTime, setPickupTime] = useState('ASAP');
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -96,6 +104,7 @@ function App() {
           className="search-box"
         />
         <button className="nav-btn" onClick={() => setPage('cart')}><FiShoppingCart /> Cart</button>
+<button className="nav-btn" onClick={() => setPage('profile')}>👤 Profile</button>
         <button className="nav-btn logout" onClick={() => {
           setUser(null);
           setCart([]);
@@ -231,7 +240,83 @@ function App() {
   // Confirmation Page
   const ConfirmationPage = () => {
     const orderId = `QB${Math.floor(Math.random() * 90000) + 10000}`;
+const ProfilePage = () => (
+  <div className="container">
+    <div className="header">
+      <h1>👤 My Profile</h1>
+      <p>Welcome, <strong>{user.name}</strong></p>
+    </div>
 
+    <button className="back-btn" onClick={() => setPage('menu')}><FiArrowLeft /> Back to Menu</button>
+
+    <div className="profile-grid">
+      <div className="profile-box">
+        <h3>📋 Profile Information</h3>
+        {!isEditingProfile ? (
+          <>
+            <p><strong>Name:</strong> {user.name}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Phone:</strong> {user.phone || 'Not added'}</p>
+            <button className="btn-primary" onClick={() => setIsEditingProfile(true)}>✏️ Edit Profile</button>
+          </>
+        ) : (
+          <>
+            <input type="text" placeholder="Name" defaultValue={user.name} id="edit-name" />
+            <input type="email" placeholder="Email" defaultValue={user.email} id="edit-email" />
+            <input type="tel" placeholder="Phone" defaultValue={user.phone} id="edit-phone" />
+            <button className="btn-primary" onClick={() => {
+              setUser({
+                ...user,
+                name: document.getElementById('edit-name').value,
+                email: document.getElementById('edit-email').value,
+                phone: document.getElementById('edit-phone').value
+              });
+              setIsEditingProfile(false);
+            }}>Save Changes</button>
+          </>
+        )}
+      </div>
+
+      <div className="profile-box">
+        <h3>🥗 Dietary Preferences</h3>
+        {['Vegetarian', 'Non-Vegetarian', 'Vegan', 'Gluten-free'].map(pref => (
+          <label key={pref} className="pref-checkbox">
+            <input type="checkbox" defaultChecked={userProfile.dietaryPreferences.includes(pref)} />
+            <span>{pref}</span>
+          </label>
+        ))}
+        <button className="btn-primary" onClick={() => {
+          const checked = Array.from(document.querySelectorAll('.pref-checkbox input:checked')).map(el => el.nextElementSibling.textContent);
+          setUserProfile({ ...userProfile, dietaryPreferences: checked });
+        }}>Save Preferences</button>
+      </div>
+    </div>
+
+    <div className="profile-section">
+      <h3>📜 Past Orders</h3>
+      {pastOrders.length === 0 ? (
+        <p>No past orders yet. Start ordering!</p>
+      ) : (
+        <div className="orders-list">
+          {pastOrders.slice(0, 5).map((order, idx) => (
+            <div key={idx} className="order-card">
+              <p><strong>Order ID:</strong> {order.id}</p>
+              <p><strong>Amount:</strong> ₹{order.amount}</p>
+              <p><strong>Date:</strong> {order.date}</p>
+              <p><strong>Status:</strong> {order.status}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <button className="btn-logout" onClick={() => {
+      setUser(null);
+      setCart([]);
+      setPage('login');
+    }}>👤 Logout</button>
+  </div>
+);
     return (
       <div className="container">
         <div className="header">
@@ -279,6 +364,7 @@ function App() {
       {user && page === 'cart' && <CartPage />}
       {user && page === 'payment' && <PaymentPage />}
       {user && page === 'confirmation' && <ConfirmationPage />}
+{user && page === 'profile' && <ProfilePage />}
     </div>
   );
 }
