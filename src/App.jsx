@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import { FiShoppingCart, FiLogOut, FiArrowLeft, FiHome } from 'react-icons/fi';
+import { FiShoppingCart, FiLogOut, FiArrowLeft } from 'react-icons/fi';
 
 const MENU_DATA = [
   { id: 1, name: "Paneer Tikka Wrap", desc: "Grilled paneer with cucumber, tomato & mint chutney", price: 120, cal: 450, protein: 18, img: "🌯", category: "Vegetarian" },
@@ -12,25 +12,17 @@ const MENU_DATA = [
   { id: 7, name: "Vegan Thai Curry", desc: "Coconut curry with vegetables, tofu & jasmine rice", price: 130, cal: 480, protein: 14, img: "🍛", category: "Vegan" },
   { id: 8, name: "Green Salad with Hummus", desc: "Mixed greens, cherry tomatoes, cucumber & hummus dressing", price: 90, cal: 250, protein: 8, img: "🥬", category: "Vegan" }
 ];
+
 function App() {
   const [page, setPage] = useState('login');
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [userProfile, setUserProfile] = useState({
-  name: '',
-  email: '',
-  phone: '',
-  dietaryPreferences: []
-});
-const [pastOrders, setPastOrders] = useState([]);
-const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const [pickupTime, setPickupTime] = useState('ASAP');
   const [paymentMethod, setPaymentMethod] = useState('');
 
-  // Login Page
   const LoginPage = () => (
     <div className="container">
       <div className="header">
@@ -51,7 +43,7 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
           <button className="btn-primary" onClick={() => {
             const email = document.getElementById('login-email').value;
             if (email) {
-              setUser({ email, name: email.split('@')[0].toUpperCase() });
+              setUser({ email, name: email.split('@')[0].toUpperCase(), phone: '+91 XXXXXXXXXX' });
               setPage('menu');
             }
           }}>🔓 Login</button>
@@ -67,7 +59,7 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
             const email = document.getElementById('signup-email').value;
             const name = document.getElementById('signup-name').value;
             if (email && name) {
-              setUser({ email, name: name.toUpperCase() });
+              setUser({ email, name: name.toUpperCase(), phone: document.getElementById('signup-phone').value });
               setPage('menu');
             }
           }}>✅ Create Account</button>
@@ -76,7 +68,6 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
     </div>
   );
 
-  // Menu Page
   const MenuPage = () => (
     <div className="container">
       <div className="header">
@@ -85,17 +76,6 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
       </div>
 
       <div className="nav-bar">
-<div className="category-filters">
-  {['All', 'Vegetarian', 'Non-Vegetarian', 'Vegan'].map(cat => (
-    <button
-      key={cat}
-      className={`filter-btn ${selectedCategory === cat ? 'active' : ''}`}
-      onClick={() => setSelectedCategory(cat)}
-    >
-      {cat}
-    </button>
-  ))}
-</div>
         <input 
           type="text" 
           placeholder="🔍 Search items..." 
@@ -103,8 +83,8 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
           onChange={(e) => setSearch(e.target.value)}
           className="search-box"
         />
+        <button className="nav-btn" onClick={() => setPage('profile')}>👤 Profile</button>
         <button className="nav-btn" onClick={() => setPage('cart')}><FiShoppingCart /> Cart</button>
-<button className="nav-btn" onClick={() => setPage('profile')}>👤 Profile</button>
         <button className="nav-btn logout" onClick={() => {
           setUser(null);
           setCart([]);
@@ -112,11 +92,23 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
         }}><FiLogOut /> Logout</button>
       </div>
 
+      <div className="category-filters">
+        {['All', 'Vegetarian', 'Non-Vegetarian', 'Vegan'].map(cat => (
+          <button
+            key={cat}
+            className={`filter-btn ${selectedCategory === cat ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div className="menu-grid">
         {MENU_DATA.filter(item => 
-  (selectedCategory === 'All' || item.category === selectedCategory) &&
-  item.name.toLowerCase().includes(search.toLowerCase())
-).map(item => (
+          (selectedCategory === 'All' || item.category === selectedCategory) &&
+          item.name.toLowerCase().includes(search.toLowerCase())
+        ).map(item => (
           <div key={item.id} className="menu-card">
             <div className="item-emoji">{item.img}</div>
             <h3>{item.name}</h3>
@@ -137,9 +129,10 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
     </div>
   );
 
-  // Cart Page
   const CartPage = () => {
     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const gst = Math.round(total * 0.05);
+    const finalTotal = total + gst;
     const totalCal = cart.reduce((sum, item) => sum + (item.cal * item.qty), 0);
 
     return (
@@ -177,7 +170,9 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
 
             <div className="cart-summary">
               <div className="summary-box">
-                <h3 className="total-price">₹{total}</h3>
+                <p><strong>Subtotal:</strong> ₹{total}</p>
+                <p><strong>GST (5%):</strong> ₹{gst}</p>
+                <h3 className="total-price">₹{finalTotal}</h3>
                 <p>Total Calories: {totalCal} kcal</p>
               </div>
 
@@ -193,7 +188,7 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
             </div>
 
             <button className="btn-checkout" onClick={() => {
-              setOrderTotal(total);
+              setOrderTotal(finalTotal);
               setPage('payment');
             }}>💳 Proceed to Payment</button>
           </>
@@ -202,7 +197,6 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
     );
   };
 
-  // Payment Page
   const PaymentPage = () => (
     <div className="container">
       <div className="header">
@@ -237,96 +231,9 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
     </div>
   );
 
-  // Confirmation Page
   const ConfirmationPage = () => {
     const orderId = `QB${Math.floor(Math.random() * 90000) + 10000}`;
-const ProfilePage = () => (
-  <div className="container">
-    <div className="header">
-      <h1>👤 My Profile</h1>
-    </div>
-    <p>Profile page works!</p>
-    <p>Name: {user.name}</p>
-    <p>Email: {user.email}</p>
-    <button className="btn-primary" onClick={() => setPage('menu')}>Back to Menu</button>
-    <button className="btn-logout" onClick={() => {
-      setUser(null);
-      setCart([]);
-      setPage('login');
-    }}>Logout</button>
-  </div>
-);
 
-    <button className="back-btn" onClick={() => setPage('menu')}><FiArrowLeft /> Back to Menu</button>
-
-    <div className="profile-grid">
-      <div className="profile-box">
-        <h3>📋 Profile Information</h3>
-        {!isEditingProfile ? (
-          <>
-            <p><strong>Name:</strong> {user.name}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Phone:</strong> {user.phone || 'Not added'}</p>
-            <button className="btn-primary" onClick={() => setIsEditingProfile(true)}>✏️ Edit Profile</button>
-          </>
-        ) : (
-          <>
-            <input type="text" placeholder="Name" defaultValue={user.name} id="edit-name" />
-            <input type="email" placeholder="Email" defaultValue={user.email} id="edit-email" />
-            <input type="tel" placeholder="Phone" defaultValue={user.phone} id="edit-phone" />
-            <button className="btn-primary" onClick={() => {
-              setUser({
-                ...user,
-                name: document.getElementById('edit-name').value,
-                email: document.getElementById('edit-email').value,
-                phone: document.getElementById('edit-phone').value
-              });
-              setIsEditingProfile(false);
-            }}>Save Changes</button>
-          </>
-        )}
-      </div>
-
-      <div className="profile-box">
-        <h3>🥗 Dietary Preferences</h3>
-        {['Vegetarian', 'Non-Vegetarian', 'Vegan', 'Gluten-free'].map(pref => (
-          <label key={pref} className="pref-checkbox">
-            <input type="checkbox" defaultChecked={userProfile.dietaryPreferences.includes(pref)} />
-            <span>{pref}</span>
-          </label>
-        ))}
-        <button className="btn-primary" onClick={() => {
-          const checked = Array.from(document.querySelectorAll('.pref-checkbox input:checked')).map(el => el.nextElementSibling.textContent);
-          setUserProfile({ ...userProfile, dietaryPreferences: checked });
-        }}>Save Preferences</button>
-      </div>
-    </div>
-
-    <div className="profile-section">
-      <h3>📜 Past Orders</h3>
-      {pastOrders.length === 0 ? (
-        <p>No past orders yet. Start ordering!</p>
-      ) : (
-        <div className="orders-list">
-          {pastOrders.slice(0, 5).map((order, idx) => (
-            <div key={idx} className="order-card">
-              <p><strong>Order ID:</strong> {order.id}</p>
-              <p><strong>Amount:</strong> ₹{order.amount}</p>
-              <p><strong>Date:</strong> {order.date}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-
-    <button className="btn-logout" onClick={() => {
-      setUser(null);
-      setCart([]);
-      setPage('login');
-    }}>👤 Logout</button>
-  </div>
-);
     return (
       <div className="container">
         <div className="header">
@@ -367,6 +274,33 @@ const ProfilePage = () => (
     );
   };
 
+  const ProfilePage = () => (
+    <div className="container">
+      <div className="header">
+        <h1>👤 My Profile</h1>
+      </div>
+      <button className="back-btn" onClick={() => setPage('menu')}><FiArrowLeft /> Back to Menu</button>
+      <div className="profile-box">
+        <h3>📋 Profile Information</h3>
+        <p><strong>Name:</strong> {user.name}</p>
+        <p><strong>Email:</strong> {user.email}</p>
+        <p><strong>Phone:</strong> {user.phone}</p>
+      </div>
+      <div className="profile-box">
+        <h3>🥗 Dietary Preferences</h3>
+        <label><input type="checkbox" /> Vegetarian</label><br/>
+        <label><input type="checkbox" /> Non-Vegetarian</label><br/>
+        <label><input type="checkbox" /> Vegan</label><br/>
+        <label><input type="checkbox" /> Gluten-free</label><br/>
+      </div>
+      <button className="btn-logout" onClick={() => {
+        setUser(null);
+        setCart([]);
+        setPage('login');
+      }}>👤 Logout</button>
+    </div>
+  );
+
   return (
     <div className="app">
       {!user && page === 'login' && <LoginPage />}
@@ -374,7 +308,7 @@ const ProfilePage = () => (
       {user && page === 'cart' && <CartPage />}
       {user && page === 'payment' && <PaymentPage />}
       {user && page === 'confirmation' && <ConfirmationPage />}
-{user && page === 'profile' && <ProfilePage />}
+      {user && page === 'profile' && <ProfilePage />}
     </div>
   );
 }
